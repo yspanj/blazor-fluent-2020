@@ -1,0 +1,32 @@
+﻿@using Demo.FluentUi.Models
+@using Demo.FluentUi.Services
+
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<FluentAutocomplete TOption="Country"
+                    AutoComplete="off"
+                    Autofocus="true"
+                    Label="Select a country"
+                    Width="250px"
+                    Placeholder="Select countries"
+                    OnOptionsSearch="@OnSearchAsync"
+                    OptionDisabled="@(e => e.Code == "au")"
+                    MaximumSelectedOptions="5"
+                    OptionText="@(item => item.Name)"
+                    @bind-SelectedOptions="@_selectedItems" />
+
+
+@code {
+    private IEnumerable<Country> _selectedItems = Array.Empty<Country>();
+    private readonly DemoDataService _data = new();
+
+    private async Task OnSearchAsync(OptionsSearchEventArgs<Country> e)
+    {
+        var allCountries = await _data.GetCountriesAsync();
+        e.Items = allCountries.Where(i => i.Name.StartsWith(e.Text, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(i => i.Name);
+    }
+}
